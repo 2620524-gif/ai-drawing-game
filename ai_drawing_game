@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>AI 실시간 낙서 인식기 - 긴급수정</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <script src="https://unpkg.com/ml5@0.12.2/dist/ml5.min.js"></script>
+    <style>
+        body { font-family: sans-serif; text-align: center; background: #f4f4f9; padding-top: 20px; }
+        canvas { border: 5px solid #2d3436; border-radius: 10px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        #status-box { margin: 15px; padding: 10px; font-weight: bold; }
+        .loading { color: #e67e22; }
+        .ready { color: #27ae60; }
+        #history { width: 320px; margin: 20px auto; background: white; padding: 15px; border-radius: 10px; height: 200px; overflow-y: auto; text-align: left; border: 1px solid #ddd; }
+        .log-item { border-bottom: 1px solid #eee; padding: 5px 0; display: flex; justify-content: space-between; }
+    </style>
+</head>
+<body>
+    <h2>🚀 AI 실시간 그림 추측기</h2>
+    <div id="status-box" class="loading">상태: 라이브러리 및 모델 불러오는 중...</div>
+    
+    <div id="canvas-container"></div>
+    <button onclick="resetCanvas()" style="margin-top:15px; padding: 10px 25px; cursor: pointer; border-radius: 5px; border: none; background: #2d3436; color: white;">그림 지우기</button>
+
+    <div id="history">
+        <strong>예측 기록:</strong>
+        <div id="log-list"></div>
+    </div>
+
+    <script>
+        let classifier;
+        let canvas;
+        let isReady = false;
+
+        function setup() {
+            // 캔버스 생성
+            canvas = createCanvas(300, 300);
+            canvas.parent('canvas-container');
+            background(255);
+
+            // [핵심] DoodleNet 모델을 더 명시적으로 로드
+            console.log("모델 로딩 시도...");
+            classifier = ml5.imageClassifier('DoodleNet', () => {
+                console.log("모델 로드 완료!");
+                isReady = true;
+                const status = document.getElementById('status-box');
+                status.innerText = "상태: ✅ 준비 완료! 그림을 그려보세요.";
+                status.className = "ready";
+                
+                // 2초마다 예측 루프 실행
+                setInterval(classifyDrawing, 2000);
+            });
+        }
+
+        function draw() {
+            if (mouseIsPressed) {
+                strokeWeight(12); // 선 굵기 (중요: 너무 얇으면 인식 못함)
+                stroke(0);
+                line(pmouseX, pmouseY, mouseX, mouseY);
+            }
+        }
+
+        function resetCanvas() {
+            background(255);
+        }
+
+        function classifyDrawing() {
+            if (!isReady) return;
+
+            classifier.classify(canvas, (err, results) => {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+                if (results && results.length > 0) {
+                    addLog(results[0].label, results[0].confidence);
+                }
+            });
+        }
+
+        function addLog(label, conf) {
+            const list = document.getElementById('log-list');
+            const item = document.createElement('div');
+            item.className = 'log-item';
+            const percentage = (conf * 100).toFixed(1);
+            
+            item.innerHTML = `<span>🏷️ <b>${label}</b></span> <span>${percentage}%</span>`;
+            list.prepend(item);
+        }
+    </script>
+</body>
+</html>
