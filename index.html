@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta charset="UTF-8">
     <title>AI 실시간 낙서 인식기 - 긴급수정</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
     <script src="https://unpkg.com/ml5@0.12.2/dist/ml5.min.js"></script>
     <style>
+        canvas {
+            touch-action: none; /* 터치 시 화면 스크롤이나 확대 이벤트를 무시함 */
+        }
         body { font-family: sans-serif; text-align: center; background: #f4f4f9; padding-top: 20px; }
         canvas { border: 5px solid #2d3436; border-radius: 10px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
         #status-box { margin: 15px; padding: 10px; font-weight: bold; }
